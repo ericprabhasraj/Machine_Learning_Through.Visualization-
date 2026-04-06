@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ML Visualized — Learn Machine Learning Interactively</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,700;1,9..40,300&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0f;
+  --bg2:#111118;
+  --bg3:#1a1a26;
+  --surface:#1e1e2e;
+  --border:#2a2a3e;
+  --accent:#7c5cfc;
+  --accent2:#fc5c7d;
+  --accent3:#5cf4e4;
+  --text:#e8e8f0;
+  --text2:#9090a8;
+  --text3:#5a5a72;
+  --mono:'Space Mono',monospace;
+  --sans:'DM Sans',sans-serif;
+  --serif:'Instrument Serif',serif;
+  --r:12px;
+  --r2:20px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.6;overflow-x:hidden}
+canvas{display:block}
+a{color:var(--accent);text-decoration:none}
+
+/* GRID OVERLAY */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:60px 60px;
+  opacity:.3;pointer-events:none;z-index:0;
+}
+
+/* NAV */
+nav{
+  position:fixed;top:0;width:100%;z-index:100;
+  backdrop-filter:blur(16px);
+  background:rgba(10,10,15,0.85);
+  border-bottom:1px solid var(--border);
+  padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:60px;
+}
+.nav-logo{font-family:var(--mono);font-size:14px;color:var(--accent);letter-spacing:2px;text-transform:uppercase}
+.nav-links{display:flex;gap:2rem}
+.nav-links a{font-size:13px;color:var(--text2);transition:color .2s;letter-spacing:.5px}
+.nav-links a:hover{color:var(--text)}
+
+/* HERO */
+.hero{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  position:relative;padding:80px 2rem 4rem;text-align:center;
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  border:1px solid var(--border);border-radius:100px;
+  padding:6px 16px;font-size:12px;font-family:var(--mono);
+  color:var(--text2);margin-bottom:2rem;
+}
+.hero-badge span{width:6px;height:6px;border-radius:50%;background:var(--accent3);display:inline-block;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+h1.hero-title{
+  font-family:var(--serif);font-size:clamp(3rem,8vw,7rem);font-weight:400;
+  line-height:1.05;margin-bottom:1.5rem;
+  background:linear-gradient(135deg,#e8e8f0 30%,var(--accent) 60%,var(--accent2) 90%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.hero-sub{font-size:1.1rem;color:var(--text2);max-width:560px;margin:0 auto 3rem;font-weight:300}
+.hero-cta{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.btn{
+  padding:12px 28px;border-radius:var(--r);font-size:14px;font-family:var(--sans);
+  font-weight:500;cursor:pointer;transition:all .2s;border:none;
+}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:#6a4de8;transform:translateY(-1px)}
+.btn-outline{background:transparent;color:var(--text);border:1px solid var(--border)}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+
+/* SECTION */
+section{position:relative;z-index:1;padding:5rem 2rem}
+.container{max-width:1100px;margin:0 auto}
+.section-label{font-family:var(--mono);font-size:11px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;margin-bottom:1rem}
+.section-title{font-family:var(--serif);font-size:clamp(2rem,4vw,3rem);font-weight:400;margin-bottom:1rem}
+.section-sub{color:var(--text2);max-width:540px;font-weight:300;margin-bottom:3rem}
+
+/* CARDS GRID */
+.module-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem}
+.module-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);
+  padding:1.75rem;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;
+}
+.module-card::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(124,92,252,.08),transparent 60%);
+  opacity:0;transition:opacity .3s;pointer-events:none;
+}
+.module-card:hover{border-color:var(--accent);transform:translateY(-3px)}
+.module-card:hover::before{opacity:1}
+.card-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:1.25rem}
+.card-title{font-size:1.1rem;font-weight:500;margin-bottom:.5rem}
+.card-desc{font-size:.875rem;color:var(--text2);line-height:1.6}
+.card-tag{
+  display:inline-block;margin-top:1rem;padding:3px 10px;border-radius:100px;
+  font-size:11px;font-family:var(--mono);border:1px solid;
+}
+
+/* VISUALIZER PANELS */
+.viz-panel{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);
+  overflow:hidden;margin-bottom:2rem;
+}
+.viz-header{
+  padding:1rem 1.5rem;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.viz-title{font-family:var(--mono);font-size:13px;color:var(--accent);letter-spacing:1px}
+.viz-controls{display:flex;gap:.75rem;align-items:center;flex-wrap:wrap}
+.viz-body{padding:1.5rem}
+label.ctrl{font-size:12px;color:var(--text2);margin-right:.3rem}
+input[type=range]{accent-color:var(--accent);width:90px;cursor:pointer}
+select{
+  background:var(--bg3);color:var(--text);border:1px solid var(--border);
+  border-radius:6px;padding:4px 8px;font-size:12px;cursor:pointer;font-family:var(--sans);
+}
+button.small{
+  background:var(--bg3);color:var(--text2);border:1px solid var(--border);
+  border-radius:6px;padding:5px 12px;font-size:12px;cursor:pointer;transition:all .2s;font-family:var(--sans);
+}
+button.small:hover{border-color:var(--accent);color:var(--accent)}
+button.small.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* STATS BAR */
+.stats-bar{
+  display:flex;gap:1.5rem;flex-wrap:wrap;
+  padding:1rem 1.5rem;background:var(--bg3);border-top:1px solid var(--border);
+}
+.stat{font-size:12px;color:var(--text2);font-family:var(--mono)}
+.stat b{color:var(--text)}
+
+/* PROBABILITY */
+.prob-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+@media(max-width:600px){.prob-grid{grid-template-columns:1fr}}
+.prob-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem}
+.prob-title{font-size:13px;font-family:var(--mono);color:var(--accent3);margin-bottom:.75rem}
+
+/* FOOTER */
+footer{
+  border-top:1px solid var(--border);padding:2rem;text-align:center;
+  font-size:12px;color:var(--text3);font-family:var(--mono);
+}
+.glow-dot{
+  width:8px;height:8px;border-radius:50%;
+  box-shadow:0 0 12px 4px;
+  display:inline-block;
+}
+
+/* TABS */
+.tabs{display:flex;gap:.5rem;margin-bottom:1.5rem;border-bottom:1px solid var(--border);padding-bottom:.5rem}
+.tab{
+  padding:8px 16px;border-radius:var(--r) var(--r) 0 0;font-size:13px;
+  cursor:pointer;color:var(--text2);transition:all .2s;border:none;background:transparent;font-family:var(--sans);
+}
+.tab.active{color:var(--accent);border-bottom:2px solid var(--accent);margin-bottom:-3px}
+
+/* TOOLTIP */
+.tooltip{
+  position:absolute;background:var(--bg);border:1px solid var(--border);
+  border-radius:8px;padding:6px 10px;font-size:11px;font-family:var(--mono);
+  pointer-events:none;z-index:50;color:var(--text);display:none;
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">ML_VIZ</div>
+  <div class="nav-links">
+    <a href="#modules">Modules</a>
+    <a href="#decision-boundary">Decision Boundary</a>
+    <a href="#probability">Probability</a>
+    <a href="#neural">Neural Networks</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div>
+    <div class="hero-badge"><span></span>Interactive Learning Platform</div>
+    <h1 class="hero-title">See Machine<br/>Learning Think</h1>
+    <p class="hero-sub">Visualize algorithms in real time. From decision boundaries to neural networks — learn by doing, not just reading.</p>
+    <div class="hero-cta">
+      <a href="#modules" class="btn btn-primary">Start Learning</a>
+      <a href="#decision-boundary" class="btn btn-outline">Try Visualizer</a>
+    </div>
+  </div>
+</section>
+
+<!-- MODULES -->
+<section id="modules">
+  <div class="container">
+    <div class="section-label">Curriculum</div>
+    <h2 class="section-title">Core ML Concepts</h2>
+    <p class="section-sub">Six interactive modules covering the foundations of machine learning, each with live visualizations.</p>
+    <div class="module-grid">
+      <div class="module-card" onclick="scrollTo('#decision-boundary')">
+        <div class="card-icon" style="background:rgba(124,92,252,.15)">🎯</div>
+        <div class="card-title">Decision Boundaries</div>
+        <div class="card-desc">Watch how classifiers carve up feature space. Explore KNN, SVM, and logistic regression interactively.</div>
+        <div class="card-tag" style="color:var(--accent);border-color:rgba(124,92,252,.3)">Interactive</div>
+      </div>
+      <div class="module-card" onclick="scrollTo('#probability')">
+        <div class="card-icon" style="background:rgba(92,244,228,.15)">🎲</div>
+        <div class="card-title">Probability Theory</div>
+        <div class="card-desc">Bayes' theorem, conditional probability, and distributions visualized with live sampling experiments.</div>
+        <div class="card-tag" style="color:var(--accent3);border-color:rgba(92,244,228,.3)">Simulation</div>
+      </div>
+      <div class="module-card" onclick="scrollTo('#neural')">
+        <div class="card-icon" style="background:rgba(252,92,125,.15)">🧠</div>
+        <div class="card-title">Neural Networks</div>
+        <div class="card-desc">Build and train a network layer by layer. Visualize activations and backpropagation live.</div>
+        <div class="card-tag" style="color:var(--accent2);border-color:rgba(252,92,125,.3)">Live Training</div>
+      </div>
+      <div class="module-card" onclick="scrollTo('#gradient')">
+        <div class="card-icon" style="background:rgba(124,92,252,.15)">📉</div>
+        <div class="card-title">Gradient Descent</div>
+        <div class="card-desc">Animate the optimization path across loss landscapes. Tune learning rate and see convergence.</div>
+        <div class="card-tag" style="color:var(--accent);border-color:rgba(124,92,252,.3)">Animated</div>
+      </div>
+      <div class="module-card">
+        <div class="card-icon" style="background:rgba(92,244,228,.15)">🌲</div>
+        <div class="card-title">Decision Trees</div>
+        <div class="card-desc">Grow trees in real time. Understand splitting criteria, depth, and how overfitting happens.</div>
+        <div class="card-tag" style="color:var(--accent3);border-color:rgba(92,244,228,.3)">Coming Soon</div>
+      </div>
+      <div class="module-card">
+        <div class="card-icon" style="background:rgba(252,92,125,.15)">🔵</div>
+        <div class="card-title">Clustering</div>
+        <div class="card-desc">K-Means and DBSCAN in motion. Add points, run iterations, and watch clusters emerge.</div>
+        <div class="card-tag" style="color:var(--accent2);border-color:rgba(252,92,125,.3)">Coming Soon</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DECISION BOUNDARY -->
+<section id="decision-boundary">
+  <div class="container">
+    <div class="section-label">Module 01</div>
+    <h2 class="section-title">Decision Boundary Visualizer</h2>
+    <p class="section-sub">Click on the canvas to place data points. Select a class, choose a classifier, and watch it learn.</p>
+
+    <div class="viz-panel">
+      <div class="viz-header">
+        <span class="viz-title">CLASSIFIER_VIZ.canvas</span>
+        <div class="viz-controls">
+          <label class="ctrl">Class:</label>
+          <button class="small active" id="cls0-btn" onclick="setClass(0)">Class A</button>
+          <button class="small" id="cls1-btn" onclick="setClass(1)">Class B</button>
+          <label class="ctrl" style="margin-left:.5rem">Algorithm:</label>
+          <select id="algo-select" onchange="runClassifier()">
+            <option value="knn">KNN (k=3)</option>
+            <option value="logistic">Logistic Regression</option>
+            <option value="svm">SVM (Linear)</option>
+          </select>
+          <button class="small" onclick="clearCanvas()">Clear</button>
+          <button class="small" onclick="generateSample()">Sample Data</button>
+        </div>
+      </div>
+      <div class="viz-body" style="padding:0;position:relative">
+        <canvas id="decision-canvas" width="900" height="420" style="width:100%;cursor:crosshair"></canvas>
+        <div class="tooltip" id="db-tooltip"></div>
+      </div>
+      <div class="stats-bar">
+        <div class="stat">points: <b id="stat-points">0</b></div>
+        <div class="stat">class_a: <b id="stat-a" style="color:var(--accent)">0</b></div>
+        <div class="stat">class_b: <b id="stat-b" style="color:var(--accent2)">0</b></div>
+        <div class="stat">algorithm: <b id="stat-algo">KNN</b></div>
+        <div class="stat">accuracy: <b id="stat-acc">—</b></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBABILITY -->
+<section id="probability">
+  <div class="container">
+    <div class="section-label">Module 02</div>
+    <h2 class="section-title">Probability & Bayes</h2>
+    <p class="section-sub">Run experiments, sample distributions, and build intuition for the math behind ML.</p>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchProbTab('coin',this)">Coin Flips</button>
+      <button class="tab" onclick="switchProbTab('normal',this)">Normal Distribution</button>
+      <button class="tab" onclick="switchProbTab('bayes',this)">Bayes' Theorem</button>
+    </div>
+
+    <div id="prob-coin" class="prob-tab">
+      <div class="viz-panel">
+        <div class="viz-header">
+          <span class="viz-title">BERNOULLI_EXPERIMENT</span>
+          <div class="viz-controls">
+            <label class="ctrl">p(heads):</label>
+            <input type="range" id="coin-bias" min="0" max="100" value="50" oninput="updateCoinBias()"/>
+            <span id="coin-bias-val" style="font-family:var(--mono);font-size:12px;color:var(--accent)">0.50</span>
+            <button class="small" onclick="flipCoins(100)">Flip 100</button>
+            <button class="small" onclick="flipCoins(1000)">Flip 1000</button>
+            <button class="small" onclick="resetCoins()">Reset</button>
+          </div>
+        </div>
+        <div class="viz-body">
+          <canvas id="coin-canvas" width="900" height="280" style="width:100%"></canvas>
+        </div>
+        <div class="stats-bar">
+          <div class="stat">total_flips: <b id="coin-total">0</b></div>
+          <div class="stat">heads: <b id="coin-heads">0</b></div>
+          <div class="stat">tails: <b id="coin-tails">0</b></div>
+          <div class="stat">empirical_p: <b id="coin-emp">—</b></div>
+          <div class="stat">expected_p: <b id="coin-exp">0.50</b></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="prob-normal" class="prob-tab" style="display:none">
+      <div class="viz-panel">
+        <div class="viz-header">
+          <span class="viz-title">GAUSSIAN_DISTRIBUTION</span>
+          <div class="viz-controls">
+            <label class="ctrl">μ:</label>
+            <input type="range" id="norm-mu" min="-3" max="3" value="0" step=".1" oninput="drawNormal()"/>
+            <span id="norm-mu-val" style="font-family:var(--mono);font-size:12px;color:var(--accent)">0.0</span>
+            <label class="ctrl">σ:</label>
+            <input type="range" id="norm-sigma" min="1" max="30" value="10" oninput="drawNormal()"/>
+            <span id="norm-sigma-val" style="font-family:var(--mono);font-size:12px;color:var(--accent)">1.0</span>
+          </div>
+        </div>
+        <div class="viz-body">
+          <canvas id="normal-canvas" width="900" height="300" style="width:100%"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div id="prob-bayes" class="prob-tab" style="display:none">
+      <div class="viz-panel">
+        <div class="viz-header">
+          <span class="viz-title">BAYES_THEOREM_VISUALIZER</span>
+        </div>
+        <div class="viz-body">
+          <div class="prob-grid">
+            <div class="prob-card">
+              <div class="prob-title">// Prior Probabilities</div>
+              <div style="margin-bottom:1rem">
+                <label class="ctrl" style="display:block;margin-bottom:.3rem">P(Disease) = <span id="b-prior-val" style="color:var(--accent3)">0.01</span></label>
+                <input type="range" id="b-prior" min="1" max="50" value="1" oninput="updateBayes()" style="width:100%"/>
+              </div>
+              <div>
+                <label class="ctrl" style="display:block;margin-bottom:.3rem">P(+|Disease) = <span id="b-sens-val" style="color:var(--accent3)">0.95</span></label>
+                <input type="range" id="b-sens" min="50" max="100" value="95" oninput="updateBayes()" style="width:100%"/>
+              </div>
+              <div style="margin-top:1rem">
+                <label class="ctrl" style="display:block;margin-bottom:.3rem">P(+|No Disease) = <span id="b-spec-val" style="color:var(--accent3)">0.05</span></label>
+                <input type="range" id="b-spec" min="1" max="50" value="5" oninput="updateBayes()" style="width:100%"/>
+              </div>
+            </div>
+            <div class="prob-card" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center">
+              <div style="font-size:12px;color:var(--text2);font-family:var(--mono);margin-bottom:.75rem">P(Disease | Positive Test)</div>
+              <div id="bayes-result" style="font-size:3.5rem;font-family:var(--mono);color:var(--accent);font-weight:700">2%</div>
+              <div id="bayes-desc" style="font-size:12px;color:var(--text2);margin-top:.75rem;max-width:200px;line-height:1.5">Even with a 95% accurate test, low base rate means most positives are false!</div>
+              <canvas id="bayes-canvas" width="200" height="80" style="width:100%;margin-top:1rem"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NEURAL NETWORK -->
+<section id="neural">
+  <div class="container">
+    <div class="section-label">Module 03</div>
+    <h2 class="section-title">Neural Network</h2>
+    <p class="section-sub">Visualize a live neural network. Adjust layers and watch activations flow through.</p>
+
+    <div class="viz-panel">
+      <div class="viz-header">
+        <span class="viz-title">NEURAL_NET.forward_pass</span>
+        <div class="viz-controls">
+          <label class="ctrl">Hidden layers:</label>
+          <select id="nn-layers" onchange="buildNetwork()">
+            <option value="1">1 layer</option>
+            <option value="2" selected>2 layers</option>
+            <option value="3">3 layers</option>
+          </select>
+          <label class="ctrl">Activation:</label>
+          <select id="nn-act" onchange="buildNetwork()">
+            <option value="relu">ReLU</option>
+            <option value="sigmoid">Sigmoid</option>
+            <option value="tanh">Tanh</option>
+          </select>
+          <button class="small" onclick="animateForward()">▶ Forward Pass</button>
+        </div>
+      </div>
+      <div class="viz-body" style="padding:0">
+        <canvas id="nn-canvas" width="900" height="380" style="width:100%"></canvas>
+      </div>
+      <div class="stats-bar">
+        <div class="stat">architecture: <b id="nn-arch">4 → 6 → 6 → 2</b></div>
+        <div class="stat">activation: <b id="nn-act-stat">ReLU</b></div>
+        <div class="stat">parameters: <b id="nn-params">—</b></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GRADIENT DESCENT -->
+<section id="gradient">
+  <div class="container">
+    <div class="section-label">Module 04</div>
+    <h2 class="section-title">Gradient Descent</h2>
+    <p class="section-sub">Watch an optimizer navigate the loss landscape. Tune the learning rate to see how convergence changes.</p>
+
+    <div class="viz-panel">
+      <div class="viz-header">
+        <span class="viz-title">LOSS_LANDSCAPE.optimizer</span>
+        <div class="viz-controls">
+          <label class="ctrl">lr:</label>
+          <input type="range" id="lr-slider" min="1" max="50" value="10" oninput="updateLR()"/>
+          <span id="lr-val" style="font-family:var(--mono);font-size:12px;color:var(--accent)">0.10</span>
+          <select id="landscape-type" onchange="resetGradient()">
+            <option value="bowl">Bowl</option>
+            <option value="saddle">Saddle Point</option>
+            <option value="valleys">Multiple Minima</option>
+          </select>
+          <button class="small" onclick="startGradient()">▶ Run</button>
+          <button class="small" onclick="resetGradient()">Reset</button>
+        </div>
+      </div>
+      <div class="viz-body" style="padding:0">
+        <canvas id="grad-canvas" width="900" height="420" style="width:100%"></canvas>
+      </div>
+      <div class="stats-bar">
+        <div class="stat">iteration: <b id="grad-iter">0</b></div>
+        <div class="stat">loss: <b id="grad-loss">—</b></div>
+        <div class="stat">learning_rate: <b id="grad-lr-stat">0.10</b></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div style="margin-bottom:.5rem">
+    <span class="glow-dot" style="background:var(--accent3);box-shadow:0 0 8px 2px var(--accent3)"></span>
+    &nbsp; ML Visualized — Built for learners, by Prabhas.
+  </div>
+  <div>Open source ·EPR · No dependencies</div>
+</footer>
+
+<script>
+// =====================
+// UTILITIES
+// =====================
+function scrollTo(id){document.querySelector(id).scrollIntoView({behavior:'smooth'})}
+
+// Card hover glow effect
+document.querySelectorAll('.module-card').forEach(card=>{
+  card.addEventListener('mousemove',e=>{
+    const r=card.getBoundingClientRect();
+    card.style.setProperty('--mx',((e.clientX-r.left)/r.width*100)+'%');
+    card.style.setProperty('--my',((e.clientY-r.top)/r.height*100)+'%');
+  });
+});
+
+// =====================
+// DECISION BOUNDARY
+// =====================
+const dbCanvas=document.getElementById('decision-canvas');
+const dbCtx=dbCanvas.getContext('2d');
+let points=[];
+let currentClass=0;
+const colors=['#7c5cfc','#fc5c7d'];
+const lightColors=['rgba(124,92,252,0.15)','rgba(252,92,125,0.15)'];
+
+function setClass(c){
+  currentClass=c;
+  document.getElementById('cls0-btn').classList.toggle('active',c===0);
+  document.getElementById('cls1-btn').classList.toggle('active',c===1);
+}
+
+function getCanvasPos(e){
+  const r=dbCanvas.getBoundingClientRect();
+  const scaleX=dbCanvas.width/r.width;
+  const scaleY=dbCanvas.height/r.height;
+  return{x:(e.clientX-r.left)*scaleX,y:(e.clientY-r.top)*scaleY};
+}
+
+dbCanvas.addEventListener('click',e=>{
+  const p=getCanvasPos(e);
+  points.push({x:p.x,y:p.y,cls:currentClass});
+  updateStats();
+  runClassifier();
+});
+
+function updateStats(){
+  const a=points.filter(p=>p.cls===0).length;
+  const b=points.filter(p=>p.cls===1).length;
+  document.getElementById('stat-points').textContent=points.length;
+  document.getElementById('stat-a').textContent=a;
+  document.getElementById('stat-b').textContent=b;
+  document.getElementById('stat-algo').textContent=document.getElementById('algo-select').value.toUpperCase();
+}
+
+function clearCanvas(){
+  points=[];updateStats();
+  dbCtx.clearRect(0,0,dbCanvas.width,dbCanvas.height);
+  drawGrid(dbCtx,dbCanvas.width,dbCanvas.height);
+  document.getElementById('stat-acc').textContent='—';
+}
+
+function drawGrid(ctx,w,h){
+  ctx.clearRect(0,0,w,h);
+  ctx.strokeStyle='rgba(42,42,62,0.5)';ctx.lineWidth=1;
+  for(let x=0;x<w;x+=60){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
+  for(let y=0;y<h;y+=60){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
+}
+
+function generateSample(){
+  clearCanvas();
+  const w=dbCanvas.width,h=dbCanvas.height;
+  for(let i=0;i<40;i++){
+    points.push({x:100+Math.random()*280,y:80+Math.random()*(h-160),cls:0});
+    points.push({x:520+Math.random()*280,y:80+Math.random()*(h-160),cls:1});
+  }
+  updateStats();runClassifier();
+}
+
+function knnPredict(x,y,k=3){
+  if(points.length<2)return-1;
+  const dists=points.map(p=>({cls:p.cls,d:(p.x-x)**2+(p.y-y)**2}));
+  dists.sort((a,b)=>a.d-b.d);
+  const top=dists.slice(0,k);
+  const votes=[0,0];
+  top.forEach(t=>votes[t.cls]++);
+  return votes[0]>votes[1]?0:1;
+}
+
+function logisticPredict(x,y){
+  if(points.length<4)return-1;
+  // Simple linear discriminant
+  const a=points.filter(p=>p.cls===0);
+  const b=points.filter(p=>p.cls===1);
+  if(!a.length||!b.length)return-1;
+  const mxa=a.reduce((s,p)=>s+p.x,0)/a.length;
+  const mya=a.reduce((s,p)=>s+p.y,0)/a.length;
+  const mxb=b.reduce((s,p)=>s+p.x,0)/b.length;
+  const myb=b.reduce((s,p)=>s+p.y,0)/b.length;
+  const dx=mxb-mxa,dy=myb-mya;
+  const cx=(mxa+mxb)/2,cy=(mya+myb)/2;
+  const dot=dx*(x-cx)+dy*(y-cy);
+  return dot>0?1:0;
+}
+
+function svmPredict(x,y){return logisticPredict(x,y);}
+
+function runClassifier(){
+  if(points.length<4)return;
+  const w=dbCanvas.width,h=dbCanvas.height;
+  const algo=document.getElementById('algo-select').value;
+  const step=8;
+  const imgData=dbCtx.createImageData(w,h);
+  for(let px=0;px<w;px+=step){
+    for(let py=0;py<h;py+=step){
+      let cls;
+      if(algo==='knn')cls=knnPredict(px,py,3);
+      else if(algo==='logistic')cls=logisticPredict(px,py);
+      else cls=svmPredict(px,py);
+      if(cls<0)continue;
+      const col=cls===0?[124,92,252]:[252,92,125];
+      for(let dx=0;dx<step&&px+dx<w;dx++){
+        for(let dy=0;dy<step&&py+dy<h;dy++){
+          const idx=((py+dy)*w+(px+dx))*4;
+          imgData.data[idx]=col[0];
+          imgData.data[idx+1]=col[1];
+          imgData.data[idx+2]=col[2];
+          imgData.data[idx+3]=40;
+        }
+      }
+    }
+  }
+  dbCtx.putImageData(imgData,0,0);
+  drawGrid(dbCtx,w,h);
+  // Draw boundary hint
+  points.forEach(p=>{
+    dbCtx.beginPath();
+    dbCtx.arc(p.x,p.y,7,0,Math.PI*2);
+    dbCtx.fillStyle=colors[p.cls];
+    dbCtx.fill();
+    dbCtx.strokeStyle=p.cls===0?'rgba(124,92,252,0.5)':'rgba(252,92,125,0.5)';
+    dbCtx.lineWidth=2;
+    dbCtx.stroke();
+  });
+  // Accuracy
+  let correct=0;
+  points.forEach(p=>{
+    const pred=algo==='knn'?knnPredict(p.x,p.y,3):algo==='logistic'?logisticPredict(p.x,p.y):svmPredict(p.x,p.y);
+    if(pred===p.cls)correct++;
+  });
+  document.getElementById('stat-acc').textContent=Math.round(correct/points.length*100)+'%';
+}
+
+drawGrid(dbCtx,dbCanvas.width,dbCanvas.height);
+
+// =====================
+// PROBABILITY - COINS
+// =====================
+let coinResults=[];
+function updateCoinBias(){
+  const v=document.getElementById('coin-bias').value/100;
+  document.getElementById('coin-bias-val').textContent=v.toFixed(2);
+  document.getElementById('coin-exp').textContent=v.toFixed(2);
+}
+function flipCoins(n){
+  const p=document.getElementById('coin-bias').value/100;
+  for(let i=0;i<n;i++) coinResults.push(Math.random()<p?1:0);
+  drawCoinChart();
+}
+function resetCoins(){coinResults=[];drawCoinChart();}
+function drawCoinChart(){
+  const canvas=document.getElementById('coin-canvas');
+  const ctx=canvas.getContext('2d');
+  const w=canvas.width,h=canvas.height;
+  ctx.clearRect(0,0,w,h);
+  if(!coinResults.length){
+    ctx.fillStyle='rgba(144,144,168,0.3)';ctx.font='14px Space Mono';ctx.textAlign='center';
+    ctx.fillText('Click "Flip" to run experiments',w/2,h/2);return;
+  }
+  // Running proportion
+  const heads=coinResults.filter(x=>x===1).length;
+  const tails=coinResults.length-heads;
+  document.getElementById('coin-total').textContent=coinResults.length;
+  document.getElementById('coin-heads').textContent=heads;
+  document.getElementById('coin-tails').textContent=tails;
+  document.getElementById('coin-emp').textContent=(heads/coinResults.length).toFixed(3);
+  // Bar chart
+  const barW=w/coinResults.length;
+  const maxBars=Math.min(coinResults.length,200);
+  const step=Math.max(1,Math.floor(coinResults.length/maxBars));
+  ctx.fillStyle='rgba(42,42,62,0.3)';
+  ctx.fillRect(0,0,w,h);
+  let runH=0;
+  const plotData=[];
+  coinResults.forEach((v,i)=>{
+    runH+=v;
+    if(i%step===0) plotData.push(runH/(i+1));
+  });
+  // Line chart
+  ctx.beginPath();
+  ctx.strokeStyle='var(--accent3)';ctx.lineWidth=2;
+  plotData.forEach((v,i)=>{
+    const x=i/plotData.length*w;
+    const y=h-(v*h*0.8+h*0.1);
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+  // Expected line
+  const exp=document.getElementById('coin-bias').value/100;
+  ctx.beginPath();ctx.strokeStyle='rgba(124,92,252,0.5)';ctx.lineWidth=1;ctx.setLineDash([6,4]);
+  ctx.moveTo(0,h-(exp*h*0.8+h*0.1));ctx.lineTo(w,h-(exp*h*0.8+h*0.1));ctx.stroke();ctx.setLineDash([]);
+  // Labels
+  ctx.fillStyle='rgba(144,144,168,0.7)';ctx.font='11px Space Mono';ctx.textAlign='left';
+  ctx.fillText('p(heads) over time',8,20);
+  ctx.fillStyle='rgba(92,244,228,0.7)';ctx.fillText('empirical',8,36);
+  ctx.fillStyle='rgba(124,92,252,0.7)';ctx.fillText('expected p='+exp.toFixed(2),8,52);
+}
+drawCoinChart();
+
+// =====================
+// PROBABILITY - NORMAL
+// =====================
+function drawNormal(){
+  const canvas=document.getElementById('normal-canvas');
+  const ctx=canvas.getContext('2d');
+  const w=canvas.width,h=canvas.height;
+  ctx.clearRect(0,0,w,h);
+  const mu=parseFloat(document.getElementById('norm-mu').value);
+  const sigma=parseFloat(document.getElementById('norm-sigma').value)/10;
+  document.getElementById('norm-mu-val').textContent=mu.toFixed(1);
+  document.getElementById('norm-sigma-val').textContent=sigma.toFixed(1);
+  const xMin=-5,xMax=5;
+  const gaussian=(x)=>Math.exp(-((x-mu)**2)/(2*sigma**2))/(sigma*Math.sqrt(2*Math.PI));
+  const steps=300;
+  const pts=[];
+  for(let i=0;i<=steps;i++){
+    const x=xMin+(xMax-xMin)*i/steps;
+    pts.push({x,y:gaussian(x)});
+  }
+  const maxY=Math.max(...pts.map(p=>p.y));
+  const toCanvasX=x=>(x-xMin)/(xMax-xMin)*w;
+  const toCanvasY=y=>h-20-y/maxY*(h-40);
+  // Fill
+  ctx.beginPath();
+  ctx.moveTo(toCanvasX(xMin),h-20);
+  pts.forEach(p=>ctx.lineTo(toCanvasX(p.x),toCanvasY(p.y)));
+  ctx.lineTo(toCanvasX(xMax),h-20);
+  ctx.closePath();
+  ctx.fillStyle='rgba(124,92,252,0.15)';ctx.fill();
+  // Stroke
+  ctx.beginPath();ctx.strokeStyle=var_color('--accent');ctx.lineWidth=2;
+  pts.forEach((p,i)=>{i===0?ctx.moveTo(toCanvasX(p.x),toCanvasY(p.y)):ctx.lineTo(toCanvasX(p.x),toCanvasY(p.y));});
+  ctx.stroke();
+  // Mean line
+  ctx.beginPath();ctx.strokeStyle='rgba(92,244,228,0.6)';ctx.lineWidth=1;ctx.setLineDash([5,4]);
+  ctx.moveTo(toCanvasX(mu),20);ctx.lineTo(toCanvasX(mu),h-20);ctx.stroke();ctx.setLineDash([]);
+  // Sigma bands
+  [-1,1].forEach(s=>{
+    ctx.beginPath();ctx.strokeStyle='rgba(252,92,125,0.3)';ctx.lineWidth=1;ctx.setLineDash([3,3]);
+    ctx.moveTo(toCanvasX(mu+s*sigma),20);ctx.lineTo(toCanvasX(mu+s*sigma),h-20);ctx.stroke();ctx.setLineDash([]);
+  });
+  // Axis
+  ctx.beginPath();ctx.strokeStyle='rgba(90,90,114,0.5)';ctx.lineWidth=1;
+  ctx.moveTo(0,h-20);ctx.lineTo(w,h-20);ctx.stroke();
+  ctx.fillStyle='rgba(144,144,168,0.6)';ctx.font='11px Space Mono';ctx.textAlign='center';
+  [-4,-3,-2,-1,0,1,2,3,4].forEach(v=>{ctx.fillText(v,toCanvasX(v),h-5);});
+  ctx.fillStyle='rgba(92,244,228,0.7)';ctx.fillText('μ='+mu.toFixed(1),toCanvasX(mu),14);
+}
+
+function var_color(name){
+  return getComputedStyle(document.documentElement).getPropertyValue(name)||'#7c5cfc';
+}
+
+// =====================
+// BAYES
+// =====================
+function updateBayes(){
+  const prior=document.getElementById('b-prior').value/100;
+  const sens=document.getElementById('b-sens').value/100;
+  const fpr=document.getElementById('b-spec').value/100;
+  document.getElementById('b-prior-val').textContent=prior.toFixed(2);
+  document.getElementById('b-sens-val').textContent=sens.toFixed(2);
+  document.getElementById('b-spec-val').textContent=fpr.toFixed(2);
+  const pPos=sens*prior+fpr*(1-prior);
+  const posterior=(sens*prior)/pPos;
+  document.getElementById('bayes-result').textContent=Math.round(posterior*100)+'%';
+  const canvas=document.getElementById('bayes-canvas');
+  const ctx=canvas.getContext('2d');
+  const w=canvas.width,h=canvas.height;
+  ctx.clearRect(0,0,w,h);
+  // Bar
+  ctx.fillStyle='rgba(42,42,62,0.5)';ctx.fillRect(0,0,w,h);
+  ctx.fillStyle='rgba(124,92,252,0.8)';ctx.fillRect(0,0,posterior*w,h);
+  ctx.fillStyle='rgba(232,232,240,0.9)';ctx.font='12px Space Mono';ctx.textAlign='center';
+  ctx.fillText('Posterior: '+(posterior*100).toFixed(1)+'%',w/2,h/2+5);
+}
+
+// =====================
+// TABS
+// =====================
+function switchProbTab(id,btn){
+  document.querySelectorAll('.prob-tab').forEach(t=>t.style.display='none');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('prob-'+id).style.display='block';
+  btn.classList.add('active');
+  if(id==='normal')drawNormal();
+  if(id==='bayes')updateBayes();
+}
+
+// =====================
+// NEURAL NETWORK
+// =====================
+let nnLayers=[];
+let animFrame=null;
+function buildNetwork(){
+  const hLayers=parseInt(document.getElementById('nn-layers').value);
+  const act=document.getElementById('nn-act').value;
+  nnLayers=[];
+  const inputSize=4,outputSize=2,hiddenSize=6;
+  nnLayers.push({size:inputSize,label:'Input'});
+  for(let i=0;i<hLayers;i++) nnLayers.push({size:hiddenSize,label:'Hidden'});
+  nnLayers.push({size:outputSize,label:'Output'});
+  document.getElementById('nn-act-stat').textContent=act.charAt(0).toUpperCase()+act.slice(1);
+  let params=0;
+  for(let i=1;i<nnLayers.length;i++) params+=nnLayers[i-1].size*nnLayers[i].size+nnLayers[i].size;
+  document.getElementById('nn-params').textContent=params;
+  document.getElementById('nn-arch').textContent=nnLayers.map(l=>l.size).join(' → ');
+  drawNetwork(null);
+}
+
+function drawNetwork(activations){
+  const canvas=document.getElementById('nn-canvas');
+  const ctx=canvas.getContext('2d');
+  const w=canvas.width,h=canvas.height;
+  ctx.clearRect(0,0,w,h);
+  ctx.fillStyle='rgba(26,26,38,0.5)';ctx.fillRect(0,0,w,h);
+  const nodeR=16;
+  const layerX=[];
+  const layerY=[];
+  nnLayers.forEach((layer,li)=>{
+    const x=80+(w-160)/(nnLayers.length-1)*li;
+    layerX.push(x);
+    const nodes=[];
+    for(let ni=0;ni<layer.size;ni++){
+      const y=h/2+(ni-(layer.size-1)/2)*50;
+      nodes.push(y);
+    }
+    layerY.push(nodes);
+  });
+  // Edges
+  for(let li=0;li<nnLayers.length-1;li++){
+    layerY[li].forEach((y1)=>{
+      layerY[li+1].forEach((y2)=>{
+        ctx.beginPath();
+        ctx.strokeStyle='rgba(42,42,62,0.8)';ctx.lineWidth=1;
+        ctx.moveTo(layerX[li],y1);ctx.lineTo(layerX[li+1],y2);
+        ctx.stroke();
+      });
+    });
+  }
+  // Nodes
+  nnLayers.forEach((layer,li)=>{
+    layerY[li].forEach((y,ni)=>{
+      const act=activations?activations[li][ni]:0.5;
+      const alpha=0.3+act*0.7;
+      ctx.beginPath();ctx.arc(layerX[li],y,nodeR,0,Math.PI*2);
+      if(li===0) ctx.fillStyle=`rgba(124,92,252,${alpha})`;
+      else if(li===nnLayers.length-1) ctx.fillStyle=`rgba(252,92,125,${alpha})`;
+      else ctx.fillStyle=`rgba(92,244,228,${alpha})`;
+      ctx.fill();
+      ctx.strokeStyle='rgba(255,255,255,0.1)';ctx.lineWidth=1;ctx.stroke();
+      if(activations){
+        ctx.fillStyle='rgba(232,232,240,0.9)';ctx.font='9px Space Mono';ctx.textAlign='center';
+        ctx.fillText(act.toFixed(1),layerX[li],y+4);
+      }
+    });
+    // Labels
+    ctx.fillStyle='rgba(144,144,168,0.5)';ctx.font='11px Space Mono';ctx.textAlign='center';
+    ctx.fillText(layer.label,layerX[li],h-10);
+  });
+}
+
+function sigmoid(x){return 1/(1+Math.exp(-x));}
+function relu(x){return Math.max(0,x);}
+function tanh(x){return Math.tanh(x);}
+
+function animateForward(){
+  if(animFrame)cancelAnimationFrame(animFrame);
+  const act=document.getElementById('nn-act').value;
+  const fn=act==='sigmoid'?sigmoid:act==='tanh'?tanh:relu;
+  let step=0;
+  function frame(){
+    const activations=nnLayers.map((layer,li)=>{
+      return Array.from({length:layer.size},(_,ni)=>{
+        if(li<step)return fn(Math.random()*4-2)*0.8+0.1;
+        return 0.1;
+      });
+    });
+    drawNetwork(activations);
+    step++;
+    if(step<=nnLayers.length) animFrame=setTimeout(()=>requestAnimationFrame(frame),250);
+  }
+  requestAnimationFrame(frame);
+}
+
+buildNetwork();
+
+// =====================
+// GRADIENT DESCENT
+// =====================
+let gradX=0.8,gradY=0.8;
+let gradRunning=false;
+let gradInterval=null;
+let gradIter=0;
+let gradPath=[];
+
+function landscape(x,y,type){
+  if(type==='bowl') return x*x+y*y;
+  if(type==='saddle') return x*x-y*y;
+  if(type==='valleys') return Math.sin(x*3)*Math.cos(y*3)+x*x*0.1+y*y*0.1;
+  return x*x+y*y;
+}
+
+function gradientOf(x,y,type){
+  const eps=0.001;
+  const gx=(landscape(x+eps,y,type)-landscape(x-eps,y,type))/(2*eps);
+  const gy=(landscape(x,y+eps,type)-landscape(x,y-eps,type))/(2*eps);
+  return{gx,gy};
+}
+
+function drawGradientCanvas(){
+  const canvas=document.getElementById('grad-canvas');
+  const ctx=canvas.getContext('2d');
+  const w=canvas.width,h=canvas.height;
+  const type=document.getElementById('landscape-type').value;
+  ctx.clearRect(0,0,w,h);
+  // Heatmap
+  const step=6;
+  for(let px=0;px<w;px+=step){
+    for(let py=0;py<h;py+=step){
+      const x=(px/w)*4-2,y=(py/h)*4-2;
+      const v=landscape(x,y,type);
+      const norm=Math.min(1,Math.max(0,(v+4)/8));
+      const r=Math.round(20+norm*100);
+      const g=Math.round(20+norm*50);
+      const b=Math.round(40+norm*180);
+      ctx.fillStyle=`rgb(${r},${g},${b})`;
+      ctx.fillRect(px,py,step,step);
+    }
+  }
+  // Contour-like overlay
+  for(let c=0;c<=5;c++){
+    ctx.beginPath();
+    const targetV=-2+c*1.5;
+    ctx.strokeStyle=`rgba(255,255,255,0.07)`;ctx.lineWidth=1;
+    for(let px=0;px<w;px++){
+      for(let py=0;py<h;py++){
+        const x=(px/w)*4-2,y=(py/h)*4-2;
+        const v=landscape(x,y,type);
+        if(Math.abs(v-targetV)<0.12){
+          ctx.moveTo(px,py);ctx.lineTo(px+1,py+1);
+        }
+      }
+    }
+    ctx.stroke();
+  }
+  // Path
+  if(gradPath.length>1){
+    ctx.beginPath();ctx.strokeStyle='rgba(92,244,228,0.8)';ctx.lineWidth=2;
+    gradPath.forEach((p,i)=>{
+      const px=(p.x+2)/4*w,py=(p.y+2)/4*h;
+      i===0?ctx.moveTo(px,py):ctx.lineTo(px,py);
+    });
+    ctx.stroke();
+    gradPath.forEach((p,i)=>{
+      const px=(p.x+2)/4*w,py=(p.y+2)/4*h;
+      ctx.beginPath();ctx.arc(px,py,3,0,Math.PI*2);
+      ctx.fillStyle=`rgba(92,244,228,${0.3+i/gradPath.length*0.7})`;ctx.fill();
+    });
+  }
+  // Current position
+  const cx=(gradX+2)/4*w,cy=(gradY+2)/4*h;
+  ctx.beginPath();ctx.arc(cx,cy,10,0,Math.PI*2);
+  ctx.fillStyle='rgba(252,92,125,0.9)';ctx.fill();
+  ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();
+  // Loss
+  const loss=landscape(gradX,gradY,type);
+  document.getElementById('grad-loss').textContent=loss.toFixed(4);
+}
+
+function updateLR(){
+  const v=document.getElementById('lr-slider').value/100;
+  document.getElementById('lr-val').textContent=v.toFixed(2);
+  document.getElementById('grad-lr-stat').textContent=v.toFixed(2);
+}
+
+function startGradient(){
+  if(gradInterval)clearInterval(gradInterval);
+  gradRunning=true;
+  gradInterval=setInterval(()=>{
+    const lr=document.getElementById('lr-slider').value/100;
+    const type=document.getElementById('landscape-type').value;
+    const{gx,gy}=gradientOf(gradX,gradY,type);
+    gradX-=lr*gx;gradY-=lr*gy;
+    gradX=Math.max(-2,Math.min(2,gradX));
+    gradY=Math.max(-2,Math.min(2,gradY));
+    gradPath.push({x:gradX,y:gradY});
+    gradIter++;
+    document.getElementById('grad-iter').textContent=gradIter;
+    drawGradientCanvas();
+    if(gradPath.length>2){
+      const last=gradPath[gradPath.length-1];
+      const prev=gradPath[gradPath.length-2];
+      const d=Math.sqrt((last.x-prev.x)**2+(last.y-prev.y)**2);
+      if(d<0.001)clearInterval(gradInterval);
+    }
+    if(gradIter>500)clearInterval(gradInterval);
+  },80);
+}
+
+function resetGradient(){
+  if(gradInterval)clearInterval(gradInterval);
+  gradX=1.2+Math.random()*0.6;gradY=1.2+Math.random()*0.6;
+  gradPath=[];gradIter=0;
+  document.getElementById('grad-iter').textContent=0;
+  document.getElementById('grad-loss').textContent='—';
+  drawGradientCanvas();
+}
+
+resetGradient();
+drawNormal();
+updateBayes();
+</script>
+</body>
+</html>
