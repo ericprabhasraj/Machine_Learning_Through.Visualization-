@@ -1,34 +1,82 @@
-# Machine_Learning_Through.Visualization-(demo_model)
+# 🧠 Machine Learning Through Visualization(working-demo)
 
-🚀 **Live Demo:** https://machinelearning-ai-eric.netlify.app/
-
-This project is a fully interactive Machine Learning learning platform designed to simplify complex concepts through visualization and hands-on exploration—without requiring any external libraries.
-
----
-
-## 🔍 Features
-
-- 🎯 **Decision Boundary Visualizer**  
-  Supports KNN, Logistic Regression, and SVM with live accuracy updates  
-
-- 📊 **Probability & Bayes Module**  
-  Includes coin flip simulations, Gaussian distribution controls, and a Bayes theorem calculator  
-
-- 🧠 **Neural Network Simulator**  
-  Adjustable layers and activation functions (ReLU, Sigmoid, Tanh)  
-
-- 📉 **Gradient Descent Visualizer**  
-  Shows optimization behavior across different loss landscapes  
+🚀 **Live Demo:** https://machinelearning-ai-eric.netlify.app/  
+💻 **GitHub Repo:** https://github.com/ericprabhasraj/Machine_Learning_Through.Visualization-
 
 ---
 
-## 💡 Purpose
+## ✨ Overview
 
-Built for students, developers, and anyone looking to develop an intuitive understanding of core ML concepts through interactive visualization.
+**Machine Learning Through Visualization** is an interactive platform designed to help you *see* how machine learning algorithms work in real-time.
+
+Instead of just reading theory, this project lets you **experiment, visualize, and understand ML concepts intuitively**.
 
 ---
 
-## 🌐 Deployment
+## 🔥 Features
 
-This project is deployed using Netlify:  
-👉 https://machinelearning-ai-eric.netlify.app/
+### 📉 Gradient Descent Visualizer
+- Watch optimization happen step-by-step
+- Adjust learning rate and observe convergence
+- Understand loss landscapes visually
+
+### 🧠 Neural Network Simulator
+- Customize hidden layers dynamically
+- Choose activation functions (ReLU, Sigmoid, Tanh)
+- Visualize forward propagation in real-time
+
+### 🎯 Decision Boundary Visualizer
+- Train models interactively (KNN, Logistic Regression, SVM)
+- Add your own data points
+- See how classifiers separate data
+
+### 📊 Probability & Bayes Module *(In Progress 🚧)*
+- Coin flip simulations
+- Gaussian distribution controls
+- Bayes theorem intuition builder
+
+---
+
+## 🎯 Why This Project?
+
+Most people struggle with Machine Learning because:
+❌ Too much theory  
+❌ Not enough intuition  
+
+✅ This project solves that by making ML **visual + interactive**
+
+---
+
+## 🛠️ Tech Stack
+
+- HTML5
+- CSS3
+- Vanilla JavaScript (No external libraries)
+
+---
+
+## ⚙️ Status
+
+🚧 **Currently in Active Development**  
+New features and improvements are being added regularly.
+
+---
+
+## 🙌 Contributions & Feedback
+
+Feel free to:
+- ⭐ Star the repo
+- 🍴 Fork it
+- 🧠 Suggest improvements
+
+---
+
+## 📬 Connect With Me
+
+If you’re interested in collaboration, internships, or ML discussions — let’s connect!
+
+---
+
+## 🌟 Support
+
+If you found this helpful, give it a ⭐ on GitHub!
