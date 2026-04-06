@@ -1,4 +1,4 @@
-# Machine_Learning_Through.Visualization-
+# Machine_Learning_Through.Visualization-(demo_model)
 
 🚀 **Live Demo:** https://machinelearning-ai-eric.netlify.app/
 
